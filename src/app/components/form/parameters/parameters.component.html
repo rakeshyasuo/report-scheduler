@@ -1,0 +1,16 @@
+<div class="card" *ngIf="parameterFields.length > 0">
+  <h3 class="card-title">Parameters</h3>
+  <div class="parameters-grid" [formGroup]="parametersGroup">
+    <div class="param-field" *ngFor="let field of parameterFields">
+      <label [for]="'param_' + field.parameter" class="param-label">
+        {{ field.parameter }}
+      </label>
+      <input 
+        [id]="'param_' + field.parameter"
+        type="text"
+        [formControlName]="field.parameter"
+        class="param-input" 
+      />
+    </div>
+  </div>
+</div>

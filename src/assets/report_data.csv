@@ -1,0 +1,24 @@
+Report Name,Parameters,Default Value,Selected columns
+/Home/administrator/ereports/test_eng_IOB1,param1,123,"FULL_NAME,CUSTOMER_ID"
+/Home/administrator/ereports/test_eng_IOB1,param2,567,
+ioShipmentsInTransit,custSeq,444,"APLLCARRBKNBR,BKG_CONFIRMATION_NTFCN_DT,CARR_BK_NBR,EDI_BOOKING_CONFIRMED_DT,authorization_dt,billActualArrivalDate,billArrivalDate,billConveyanceName,billDetailShippedCtns,billDetailShippedQty,billDetailShippedQtyUOM,billDetailShippedVolume,billDetailShippedWeight,billDischargePortLocation,billEstimatedArrivalDate,billEstimatedDepartureDate,billShipmentNumber,bookingLineActualBookedDate,bookingLineActualDeliveryDate,bookingNumber,bookingShipperName,fcrCargoReceiptNumber,poDepartmentCode,poDivisionCode,poLineProductNumber,poPurchaseOrderNumber,poVendorCode,poVendorName,poswCustPlannedReceiptDate,toEquipmentNumber,toEquipmentType,toLoadLocationName,toLoadedByFlag"
+ioShipmentsInTransit,customerTypeSeq,221,
+ioShipmentsInTransit,customerUserSeq,1441782,
+ioShipmentsInTransit,relatedAccounts,444,
+ioShipmentsInTransit,userSeq,106827,
+ioShipmentsInTransit,fromFloating,999999,
+ioShipmentsInTransit,toFloating,999999,
+ioShipmentsInTransit,reportDateType,departureDate,
+ioShipmentsInTransit,fromDate,1/1/2024,
+ioShipmentsInTransit,toDate,1/31/2024,
+ioPurchase,adhocAccounts,444,"accountCode,poDepartmentCode,poDivisionCode,poLineProductNumber,poLineQuantity,poPurchaseOrderNumber,poVendorCode,poVendorName,poswShipFromDate,poswShipToDate"
+ioPurchase,userSeq,106827,
+ioPurchase,fromFloating,9999999,
+ioPurchase,toFloating,9999999,
+ioPurchase,reportDateType,POCreationDate,
+ioPurchase,fromDate,4/1/2024,
+ioPurchase,toDate,5/31/2024,
+ioPurchase,poFilter,nofilter,
+ioPurchase,custSeq,444,
+ioPurchase,customerTypeSeq,221,
+ioPurchase,customerUserSeq,1441782,

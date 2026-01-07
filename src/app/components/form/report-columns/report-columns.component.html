@@ -1,0 +1,28 @@
+<div class="card">
+  <h3 class="card-title">
+    Report Columns <span class="required">*</span>
+  </h3>
+  
+  <div 
+    class="checkbox-container" 
+    [class.invalid]="isFormInvalid"
+  >
+    <div *ngIf="columnsList.length === 0" class="empty-state">
+      Please select a report first to see available columns
+    </div>
+    <div class="checkbox-item" *ngFor="let col of columnsList">
+      <label class="checkbox-label">
+        <input 
+          type="checkbox"
+          [checked]="isColumnSelected(col)"
+          (change)="onColumnToggle(col, $event)"
+          class="checkbox-input" 
+        />
+        <span class="checkbox-text">{{ col }}</span>
+      </label>
+    </div>
+  </div>
+  <div *ngIf="isFormInvalid" class="error-text">
+    Please select at least one column
+  </div>
+</div>

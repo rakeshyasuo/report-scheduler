@@ -1,0 +1,64 @@
+<div class="card" [formGroup]="form">
+  <h3 class="card-title">Basic Information</h3>
+  
+  <div class="form-group">
+    <label for="reportName" class="form-label">
+      Report Name <span class="required">*</span>
+    </label>
+    <select id="reportName" formControlName="reportName" class="form-control">
+      <option value="">Select Report</option>
+      <option *ngFor="let name of reportNames" [value]="name">
+        {{ name }}
+      </option>
+    </select>
+    <div *ngIf="isFieldInvalid('reportName')" class="error-text">
+      Report Name is required
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="jobName" class="form-label">
+      Job Name <span class="required">*</span>
+    </label>
+    <input 
+      id="jobName" 
+      type="text" 
+      formControlName="jobName" 
+      class="form-control" 
+      placeholder="Enter job name" 
+    />
+    <div *ngIf="isFieldInvalid('jobName')" class="error-text">
+      Job Name is required (minimum 3 characters)
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="outputName" class="form-label">Output Name</label>
+    <input 
+      id="outputName" 
+      type="text" 
+      formControlName="outputName" 
+      class="form-control" 
+      placeholder="/Test/test_output.DOI" 
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="reportFormat" class="form-label">Report Format</label>
+    <input
+      id="reportFormat"
+      type="text"
+      formControlName="reportFormat"
+      class="form-control"
+      readonly
+      placeholder="DOX / ROX"
+    />
+  </div>
+  <div class="form-group">
+    <label for="outputFormat" class="form-label">Output Format</label>
+    <select id="outputFormat" formControlName="outputFormat" class="form-control">
+      <option value="">Select Output Format</option>
+      <option *ngFor="let opt of outputOptions" [value]="opt">{{ opt }}</option>
+    </select>
+  </div>
+</div>

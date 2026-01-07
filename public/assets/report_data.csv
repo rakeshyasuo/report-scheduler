@@ -1,0 +1,24 @@
+Report Name,Parameters,Default Value
+/Home/administrator/ereports/test_eng_IOB1,param1,123
+/Home/administrator/ereports/test_eng_IOB1,param2,567
+ioShipmentsInTransit,custSeq,444
+ioShipmentsInTransit,customerTypeSeq,221
+ioShipmentsInTransit,customerUserSeq,1441782
+ioShipmentsInTransit,relatedAccounts,444
+ioShipmentsInTransit,userSeq,106827
+ioShipmentsInTransit,fromFloating,999999
+ioShipmentsInTransit,toFloating,999999
+ioShipmentsInTransit,reportDateType,departureDate
+ioShipmentsInTransit,fromDate,1/1/2024
+ioShipmentsInTransit,toDate,1/31/2024
+ioPurchase,adhocAccounts,444
+ioPurchase,userSeq,106827
+ioPurchase,fromFloating,9999999
+ioPurchase,toFloating,9999999
+ioPurchase,reportDateType,POCreationDate
+ioPurchase,fromDate,4/1/2024
+ioPurchase,toDate,5/31/2024
+ioPurchase,poFilter,nofilter
+ioPurchase,custSeq,444
+ioPurchase,customerTypeSeq,221
+ioPurchase,customerUserSeq,1441782

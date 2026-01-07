@@ -1,0 +1,4 @@
+<div *ngIf="data" [class]="'json-display' + (isSuccess ? ' success' : ' error')">
+  <h4 class="json-title">{{ title }}</h4>
+  <pre class="json-content">{{ data | json }}</pre>
+</div>
