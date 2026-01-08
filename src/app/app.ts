@@ -88,7 +88,13 @@ export class AppComponent implements OnInit, OnDestroy {
       repeatStartTime: [''],
       repeatEndTime: [''],
       intervalInSeconds: ['', [Validators.min(1), Validators.max(3600)]],
-      parameters: this.fb.group({})
+      parameters: this.fb.group({}),
+      // 🔽 🔽 🔽 ADD ONLY THESE 🔽 🔽 🔽
+        emailEnabled: [false],
+    zipEnabled: [false],
+    ftpEnabled: [false],
+
+    emailUserId: [''],
     });
   }
 

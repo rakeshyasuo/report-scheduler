@@ -1,64 +1,83 @@
 <div class="card" [formGroup]="form">
-  <h3 class="card-title">Basic Information</h3>
-  
-  <div class="form-group">
-    <label for="reportName" class="form-label">
+    <h3 class="card-title">Basic Information</h3>
+
+    <!-- Report Name -->
+    <div class="form-group">
+        <label class="form-label">
       Report Name <span class="required">*</span>
     </label>
-    <select id="reportName" formControlName="reportName" class="form-control">
+        <select formControlName="reportName" class="form-control">
       <option value="">Select Report</option>
       <option *ngFor="let name of reportNames" [value]="name">
         {{ name }}
       </option>
     </select>
-    <div *ngIf="isFieldInvalid('reportName')" class="error-text">
-      Report Name is required
+        <div *ngIf="isFieldInvalid('reportName')" class="error-text">
+            Report Name is required
+        </div>
     </div>
-  </div>
 
-  <div class="form-group">
-    <label for="jobName" class="form-label">
+    <!-- Job Name -->
+    <div class="form-group">
+        <label class="form-label">
       Job Name <span class="required">*</span>
     </label>
-    <input 
-      id="jobName" 
-      type="text" 
-      formControlName="jobName" 
-      class="form-control" 
-      placeholder="Enter job name" 
-    />
-    <div *ngIf="isFieldInvalid('jobName')" class="error-text">
-      Job Name is required (minimum 3 characters)
+        <input type="text" formControlName="jobName" class="form-control" placeholder="Enter job name" />
+        <div *ngIf="isFieldInvalid('jobName')" class="error-text">
+            Job Name is required (minimum 3 characters)
+        </div>
     </div>
-  </div>
 
-  <div class="form-group">
-    <label for="outputName" class="form-label">Output Name</label>
-    <input 
-      id="outputName" 
-      type="text" 
-      formControlName="outputName" 
-      class="form-control" 
-      placeholder="/Test/test_output.DOI" 
-    />
-  </div>
+    <!-- Output Name -->
+    <div class="form-group">
+        <label class="form-label">Output Name</label>
+        <input type="text" formControlName="outputName" class="form-control" placeholder="/Test/test_output.DOI" />
+    </div>
 
-  <div class="form-group">
-    <label for="reportFormat" class="form-label">Report Format</label>
-    <input
-      id="reportFormat"
-      type="text"
-      formControlName="reportFormat"
-      class="form-control"
-      readonly
-      placeholder="DOX / ROX"
-    />
-  </div>
-  <div class="form-group">
-    <label for="outputFormat" class="form-label">Output Format</label>
-    <select id="outputFormat" formControlName="outputFormat" class="form-control">
+    <!-- Report Format -->
+    <div class="form-group">
+        <label class="form-label">Report Format</label>
+        <input type="text" formControlName="reportFormat" class="form-control" readonly placeholder="DOX / ROX" />
+    </div>
+
+    <!-- Output Format -->
+    <div class="form-group">
+        <label class="form-label">Output Format</label>
+        <select formControlName="outputFormat" class="form-control">
       <option value="">Select Output Format</option>
-      <option *ngFor="let opt of outputOptions" [value]="opt">{{ opt }}</option>
+      <option *ngFor="let opt of outputOptions" [value]="opt">
+        {{ opt }}
+      </option>
     </select>
-  </div>
+    </div>
+
+    <!-- Delivery Options -->
+    <div class="form-group">
+        <label class="form-label">Delivery Options</label>
+
+        <label>
+      <input type="checkbox" formControlName="emailEnabled" />
+      Email
+    </label>
+
+        <label>
+      <input type="checkbox" formControlName="zipEnabled" />
+      Zip
+    </label>
+
+        <label>
+      <input type="checkbox" formControlName="ftpEnabled" />
+      FTP
+    </label>
+    </div>
+
+    <!-- Email User ID -->
+    <div class="form-group" *ngIf="form.get('emailEnabled')?.value">
+        <label class="form-label">
+      Email User ID <span class="required">*</span>
+    </label>
+        <input type="text" formControlName="emailUserId" class="form-control" placeholder="Enter Email User ID" />
+    </div>
+
+
 </div>
