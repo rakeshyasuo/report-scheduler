@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ReportScheduleService {
-  private apiUrl = 'http://OTX-H6FZ314:8181/api/reports/run';
+  private apiUrl = 'http://OTX-9J3NWG3:8181/api/reports/run';
 
   constructor(private http: HttpClient) {}
 
