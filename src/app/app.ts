@@ -80,6 +80,8 @@ export class AppComponent implements OnInit, OnDestroy {
       outputFormat: [''],
       reportColumns: this.fb.array([], Validators.required),
       scheduleType: ['', Validators.required],
+      timeZone: ['', Validators.required],
+      schedule: this.fb.group({}),  // Important: nested group   // ✅ ADD THIS LINE
       runOnDate: [''],
       onceADay: [''],
       frequencyInDays: ['', [Validators.min(1), Validators.max(365)]],
@@ -356,49 +358,43 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private buildPayload(): SchedulePayload {
-    const scheduleObj: Record<string, any> = {};
-    const scheduleType = this.form.value.scheduleType;
+  const scheduleType = this.form.value.scheduleType;
 
-    if (scheduleType) {
-      scheduleObj['scheduleType'] = scheduleType.toUpperCase().replace(/\s+/g, '_');
+  const schedule: any = {
+    scheduleType: scheduleType?.toUpperCase().replace(/\s+/g, '_')
+  };
 
-      if (scheduleType === 'One Time') {
-        scheduleObj['runOnDate'] = this.form.value.runOnDate;
-        scheduleObj['onceADay'] = this.form.value.onceADay;
-      } else if (scheduleType === 'Daily') {
-        scheduleObj['frequencyInDays'] = Number(this.form.value.frequencyInDays) || 1;
-        scheduleObj['scheduleStartDate'] = this.form.value.scheduleStartDate;
-        scheduleObj['scheduleEndDate'] = this.form.value.scheduleEndDate;
-        scheduleObj['onceADay'] = this.form.value.onceADay;
-      } else if (scheduleType === 'Repeat Window') {
-        scheduleObj['runOnDate'] = this.form.value.runOnDate;
-        scheduleObj['repeatStartTime'] = this.form.value.repeatStartTime;
-        scheduleObj['repeatEndTime'] = this.form.value.repeatEndTime;
-        scheduleObj['intervalInSeconds'] = Number(this.form.value.intervalInSeconds) || 60;
-      }
-    }
-
-    // If schedule type is Immediate, send blank value for schedule
-    if (scheduleType === 'Immediate') {
-      return {
-        informationObjectName: `${this.form.value.reportName}.dox`,
-        outputName: this.form.value.outputName || null,
-        selectedColumns: this.form.value.reportColumns || [],
-        outputFormat: this.form.value.outputFormat || null,
-        parameters: this.form.value.parameters || {},
-        schedule: 'IMMEDIATE'
-      };
-    }
-
-    return {
-      informationObjectName: `${this.form.value.reportName}.dox`,
-      outputName: this.form.value.outputName || null,
-      selectedColumns: this.form.value.reportColumns || [],
-      outputFormat: this.form.value.outputFormat || null,
-      parameters: this.form.value.parameters || {},
-      schedule: Object.keys(scheduleObj).length > 1 ? scheduleObj : null
-    };
+  if (scheduleType === 'One Time') {
+    schedule.runOnDate = this.form.value.runOnDate;
+    schedule.onceADay = this.form.value.onceADay;
   }
+
+  if (scheduleType === 'Daily') {
+    schedule.frequencyInDays = Number(this.form.value.frequencyInDays) || 1;
+    schedule.scheduleStartDate = this.form.value.scheduleStartDate;
+    schedule.scheduleEndDate = this.form.value.scheduleEndDate;
+    schedule.onceADay = this.form.value.onceADay;
+  }
+
+  if (scheduleType === 'Repeat Window') {
+    schedule.runOnDate = this.form.value.runOnDate;
+    schedule.repeatStartTime = this.form.value.repeatStartTime;
+    schedule.repeatEndTime = this.form.value.repeatEndTime;
+    schedule.intervalInSeconds = Number(this.form.value.intervalInSeconds) || 60;
+  }
+
+  // 👉 IMMEDIATE automatically works here (no extra fields)
+
+  return {
+    informationObjectName: `${this.form.value.reportName}.dox`,
+    outputName: this.form.value.outputName || null,
+    selectedColumns: this.form.value.reportColumns || [],
+    outputFormat: this.form.value.outputFormat || null,
+    parameters: this.form.value.parameters || {},
+    schedule
+  };
+}
+
 
   onCancel(): void {
     this.resetForm();
