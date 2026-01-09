@@ -1,178 +1,104 @@
 <div class="card" [formGroup]="form">
-  <h3 class="card-title">Schedule Information</h3>
+    <h3 class="card-title">Schedule Information</h3>
 
-  <div class="form-group">
-    <label for="scheduleType" class="form-label">
-      Schedule Type <span class="required">*</span>
-    </label>
-    <select 
-      id="scheduleType" 
-      formControlName="scheduleType" 
-      class="form-control"
-    >
+    <!-- Schedule Type -->
+    <div class="form-group">
+        <label class="form-label">Schedule Type <span class="required">*</span></label>
+        <select formControlName="scheduleType" class="form-control cursor-pointer">
       <option value="">Select Type</option>
       <option value="One Time">One Time</option>
       <option value="Daily">Daily</option>
       <option value="Repeat Window">Repeat Window</option>
       <option value="Immediate">Immediate</option>
     </select>
-    <div *ngIf="isFieldInvalid('scheduleType')" class="error-text">
-      Schedule Type is required
     </div>
-  </div>
 
-  <ng-container *ngIf="scheduleType === 'One Time' || scheduleType === 'Repeat Window'">
+    <!-- Time Zone - Always Visible -->
     <div class="form-group">
-      <label for="runOnDate" class="form-label">
-        Run On Date (yyyy-MM-dd) <span class="required">*</span>
-      </label>
-      <input 
-        id="runOnDate" 
-        type="date" 
-        formControlName="runOnDate" 
-        class="form-control" 
-      />
-      <div *ngIf="isFieldInvalid('runOnDate')" class="error-text">
-        Run On Date is required
-      </div>
-    </div>
-  </ng-container>
-
-  <ng-container *ngIf="scheduleType === 'One Time' || scheduleType === 'Daily'">
-    <div class="form-group">
-      <label for="onceADay" class="form-label">
-        Once A Day (HH:mm:ss) <span class="required">*</span>
-      </label>
-      <input 
-        id="onceADay" 
-        type="time" 
-        formControlName="onceADay" 
-        step="1" 
-        class="form-control" 
-      />
-      <div *ngIf="isFieldInvalid('onceADay')" class="error-text">
-        Time is required
-      </div>
-    </div>
-  </ng-container>
-
-  <ng-container *ngIf="scheduleType === 'Daily'">
-    <div class="form-group">
-      <label for="frequencyInDays" class="form-label">
-        Frequency in Days <span class="required">*</span>
-      </label>
-      <input 
-        id="frequencyInDays" 
-        type="number" 
-        formControlName="frequencyInDays" 
-        min="1" 
-        max="365" 
-        class="form-control" 
-      />
-      <div *ngIf="isFieldInvalid('frequencyInDays')" class="error-text">
-        Valid number between 1 and 365 is required
-      </div>
+        <label class="form-label">Time Zone <span class="required">*</span></label>
+        <select formControlName="timeZone" class="form-control cursor-pointer">
+      <option value="">Select Time Zone</option>
+      <option *ngFor="let tz of timeZones" [value]="tz.value">{{ tz.label }}</option>
+    </select>
     </div>
 
-    <div class="form-group">
-      <label for="scheduleStartDate" class="form-label">
-        Schedule Start Date <span class="required">*</span>
-      </label>
-      <input 
-        id="scheduleStartDate" 
-        type="date" 
-        formControlName="scheduleStartDate" 
-        class="form-control" 
-      />
-      <div *ngIf="isFieldInvalid('scheduleStartDate')" class="error-text">
-        Start Date is required
-      </div>
-    </div>
+    <!-- One Time -->
+    <ng-container *ngIf="scheduleType === 'One Time'">
+        <div class="form-group">
+            <label class="form-label">Run On Date <span class="required">*</span></label>
+            <input type="date" formControlName="runOnDate" class="form-control date-time-picker" placeholder="mm/dd/yyyy" />
+        </div>
 
-    <div class="form-group">
-      <label for="scheduleEndDate" class="form-label">
-        Schedule End Date <span class="required">*</span>
-      </label>
-      <input 
-        id="scheduleEndDate" 
-        type="date" 
-        formControlName="scheduleEndDate" 
-        class="form-control" 
-      />
-      <div *ngIf="isFieldInvalid('scheduleEndDate')" class="error-text">
-        End Date is required
-      </div>
-    </div>
-  </ng-container>
+        <div class="form-group">
+            <label class="form-label">Once A Day (HH:mm) <span class="required">*</span></label>
+            <input type="time" formControlName="onceADay" step="60" [min]="minTime" class="form-control date-time-picker" />
+            <div *ngIf="showFutureTimeErrorOnceADay()" class="error-text">
+                Please select a future time
+            </div>
+        </div>
+    </ng-container>
 
-  <ng-container *ngIf="scheduleType === 'Repeat Window'">
-    <div class="form-group">
-      <label for="repeatStartTime" class="form-label">
-        Repeat Start Time (HH:mm:ss) <span class="required">*</span>
-      </label>
-      <input 
-        id="repeatStartTime" 
-        type="time" 
-        formControlName="repeatStartTime" 
-        step="1" 
-        class="form-control" 
-      />
-      <div *ngIf="isFieldInvalid('repeatStartTime')" class="error-text">
-        Start Time is required
-      </div>
-    </div>
+    <!-- Daily -->
+    <ng-container *ngIf="scheduleType === 'Daily'">
+        <div class="form-group">
+            <label class="form-label">Once A Day (HH:mm) <span class="required">*</span></label>
+            <input type="time" formControlName="onceADay" step="60" [min]="minTime" class="form-control date-time-picker" />
+            <div *ngIf="showFutureTimeErrorOnceADay()" class="error-text">
+                Please select a future time
+            </div>
+        </div>
 
-    <div class="form-group">
-      <label for="repeatEndTime" class="form-label">
-        Repeat End Time (HH:mm:ss) <span class="required">*</span>
-      </label>
-      <input 
-        id="repeatEndTime" 
-        type="time" 
-        formControlName="repeatEndTime" 
-        step="1" 
-        class="form-control" 
-      />
-      <div *ngIf="isFieldInvalid('repeatEndTime')" class="error-text">
-        End Time is required
-      </div>
-    </div>
+        <div class="form-group">
+            <label class="form-label">Frequency in Days <span class="required">*</span></label>
+            <input type="number" formControlName="frequencyInDays" min="1" max="365" class="form-control" />
+        </div>
 
-    <div class="form-group">
-      <label for="intervalInSeconds" class="form-label">
-        Interval in Seconds <span class="required">*</span>
-      </label>
-      <input 
-        id="intervalInSeconds" 
-        type="number" 
-        formControlName="intervalInSeconds" 
-        min="1" 
-        max="3600" 
-        class="form-control" 
-      />
-      <div *ngIf="isFieldInvalid('intervalInSeconds')" class="error-text">
-        Valid number between 1 and 3600 is required
-      </div>
-    </div>
-  </ng-container>
+        <div class="form-group">
+            <label class="form-label">Schedule Start Date <span class="required">*</span></label>
+            <input type="date" formControlName="scheduleStartDate" class="form-control date-time-picker" placeholder="mm/dd/yyyy" />
+        </div>
 
-  <div class="button-group">
-    <button 
-      type="button" 
-      class="btn btn-primary" 
-      [disabled]="isSubmitting || form.invalid"
-      (click)="onSubmit()"
-    >
-      <span *ngIf="!isSubmitting">Confirm Schedule</span>
-      <span *ngIf="isSubmitting">Scheduling...</span>
+        <div class="form-group">
+            <label class="form-label">Schedule End Date <span class="required">*</span></label>
+            <input type="date" formControlName="scheduleEndDate" class="form-control date-time-picker" placeholder="mm/dd/yyyy" />
+        </div>
+    </ng-container>
+
+    <!-- Repeat Window -->
+    <ng-container *ngIf="scheduleType === 'Repeat Window'">
+        <div class="form-group">
+            <label class="form-label">Run On Date (yyyy-MM-dd) <span class="required">*</span></label>
+            <input type="date" formControlName="runOnDate" class="form-control date-time-picker" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Repeat Start Time (HH:mm) <span class="required">*</span></label>
+            <input type="time" formControlName="repeatStartTime" step="60" [min]="minTime" class="form-control date-time-picker" />
+            <div *ngIf="showFutureTimeErrorStartTime()" class="error-text">
+                Please select a future time
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Repeat End Time (HH:mm) <span class="required">*</span></label>
+            <input type="time" formControlName="repeatEndTime" step="60" class="form-control date-time-picker" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Interval in Seconds <span class="required">*</span></label>
+            <input type="number" formControlName="intervalInSeconds" min="1" class="form-control" />
+        </div>
+    </ng-container>
+
+    <!-- Immediate: No additional fields -->
+
+    <!-- Buttons -->
+    <div class="button-group">
+        <button class="btn btn-primary" [disabled]="form.invalid || isSubmitting" (click)="onSubmit()">
+      Confirm Schedule
     </button>
-    <button 
-      type="button" 
-      class="btn btn-secondary" 
-      (click)="onCancel()"
-      [disabled]="isSubmitting"
-    >
+        <button class="btn btn-secondary" (click)="onCancel()" *ngIf="scheduleType === 'One Time' || scheduleType === 'Daily'">
       Cancel
     </button>
-  </div>
+    </div>
 </div>
