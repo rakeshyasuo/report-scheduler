@@ -1,6 +1,6 @@
 Report Name,Parameters,Default Value
-/Home/administrator/ereports/test_eng_IOB1,param1,123
-/Home/administrator/ereports/test_eng_IOB1,param2,567
+/Home/administrator/ereports/test_eng_IOB1.dox,param1,123
+/Home/administrator/ereports/test_eng_IOB1.dox,param2,567
 ioShipmentsInTransit,custSeq,444
 ioShipmentsInTransit,customerTypeSeq,221
 ioShipmentsInTransit,customerUserSeq,1441782

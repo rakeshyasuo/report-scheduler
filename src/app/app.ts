@@ -15,7 +15,9 @@ import { ScheduleInfoComponent } from './components/form/schedule-info/schedule-
 import { CsvParserService } from './services/csv-parser.service';
 import { ReportDataService } from './services/report-data.service';
 import { ReportScheduleService } from './services/report-schedule.service';
-import { SchedulePayload, ParameterField, CsvRow } from './models/report.model';
+import { ColumnDataService } from './services/column-data.service';
+import { ApiConfigService } from './services/api-config.service';
+import { SchedulePayload, CsvRow } from './models/report.model';
 
 @Component({
   selector: 'app-root',
@@ -37,8 +39,6 @@ import { SchedulePayload, ParameterField, CsvRow } from './models/report.model';
 export class AppComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   reportNames: string[] = [];
-  parameterFields: ParameterField[] = [];
-  reportColumnsList: string[] = [];
   outputFormatsList: string[] = [];
 
   isSubmitting = false;
@@ -48,22 +48,34 @@ export class AppComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
 
   private csvData: CsvRow[] = [];
-  private allColumnsByReport: { [reportName: string]: string[] } = {};
-  private allDocTypeByReport: { [reportName: string]: string } = {};
-  private docFormatMappings: { [inputFormat: string]: string[] } = {};
   private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private csvParser: CsvParserService,
     private reportData: ReportDataService,
-    private reportSchedule: ReportScheduleService
+    private reportSchedule: ReportScheduleService,
+    private columnDataService: ColumnDataService,
+    private apiConfig: ApiConfigService
   ) {}
 
   ngOnInit(): void {
+    // Initialize form immediately so template can bind to it
     this.initializeForm();
-    this.loadCsv();
     this.setupFormSubscriptions();
+    
+    // Load API configuration and CSV data in parallel
+    this.apiConfig.loadApiConfig()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.loadCsv();
+        },
+        error: (error) => {
+          console.error('Failed to load API configuration:', error);
+          this.errorMessage = 'Failed to load API configuration';
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -159,30 +171,16 @@ export class AppComponent implements OnInit, OnDestroy {
 
     forkJoin({
       paramCsv: this.reportData.loadCsv('assets/report_data.csv'),
-      colCsv: this.reportData.loadCsv('assets/report_columns.csv'),
-      mappingCsv: this.reportData.loadCsv('assets/doc_format_mapping.csv')
+      columnData: this.columnDataService.loadColumnData(),
+      docFormatMappings: this.columnDataService.loadDocFormatMappings()
     })
     .pipe(takeUntil(this.destroy$))
     .subscribe({
-      next: ({ paramCsv, colCsv, mappingCsv }) => {
+      next: ({ paramCsv }) => {
         try {
           // --- Parameters CSV ---
           this.csvData = this.csvParser.parseCsvData(paramCsv);
-          this.reportData.setCsvData(this.csvData); 
           this.reportNames = this.csvParser.extractReportNames(this.csvData);
-
-          // --- Columns CSV ---
-          const columnData = this.csvParser.parseColumnsCsv(colCsv);
-          this.buildColumnsMap(columnData);
-
-          // --- Doc format mapping CSV ---
-          try {
-            this.docFormatMappings = this.csvParser.parseDocFormatMapping(mappingCsv || '');
-            console.log('Loaded doc format mappings:', Object.keys(this.docFormatMappings));
-          } catch (e) {
-            console.warn('Failed to parse doc format mappings', e);
-            this.docFormatMappings = {};
-          }
 
           this.isLoading = false;
         } catch (err) {
@@ -199,107 +197,16 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  private buildColumnsMap(csvData: any[]): void {
-    const map: { [reportName: string]: string[] } = {};
-    const docMap: { [reportName: string]: string } = {};
-    csvData.forEach(row => {
-      const reportName = row.reportName;
-      const cols = (row.columns || row.selectedColumns || '').toString();
-      if (!reportName) return;
-      // support both pipe and comma separated lists
-      const sep = cols.includes('|') ? '|' : ',';
-      map[reportName] = cols
-        .split(sep)
-        .map((c: string) => c.trim())
-        .filter(Boolean);
-      if (row.docType) {
-        docMap[reportName] = row.docType;
-      }
-    });
-    this.allColumnsByReport = map;
-    this.allDocTypeByReport = docMap;
-    console.log('Built columns map for reports:', Object.keys(map));
-  }
-
   // ---------------- HANDLE REPORT CHANGE ----------------
   private onReportChange(reportName: string): void {
     if (!reportName) {
-      this.parameterFields = [];
-      this.reportColumnsList = [];
       this.parametersGroup.reset();
       this.reportColumns.clear();
       return;
     }
 
-    // PARAMETERS
-    const reportRows = this.csvParser.getReportData(this.csvData, reportName);
-    const paramRows = reportRows.filter(r => r.parameter);
-    this.parameterFields = paramRows.map(r => ({
-      parameter: r.parameter,
-      defaultValue: r.defaultValue
-    }));
-
-    const group = this.parametersGroup;
-    Object.keys(group.controls).forEach(key => group.removeControl(key));
-    paramRows.forEach(row => {
-      group.addControl(row.parameter, this.fb.control(row.defaultValue || ''));
-    });
-
-    // COLUMNS (from columns CSV)
-    this.reportColumnsList = this.findColumnsForReport(reportName);
-    console.log('onReportChange', { reportName, reportColumnsList: this.reportColumnsList });
-    // set report format based on doc_type
-    const docType = this.findDocTypeForReport(reportName);
-    const format = docType === 'template' ? 'DOX' : docType === 'standard report' ? 'ROX' : '';
-    const ctrl = this.form.get('reportFormat');
-    if (ctrl) {
-      ctrl.setValue(format);
-    }
-    // populate output formats dropdown based on reportFormat
-    const outputCtrl = this.form.get('outputFormat');
-    this.outputFormatsList = [];
-    if (format) {
-      const key = Object.keys(this.docFormatMappings).find(k => k.toLowerCase() === format.toLowerCase());
-      const opts = key ? this.docFormatMappings[key] : [];
-      this.outputFormatsList = opts || [];
-      if (outputCtrl) {
-        outputCtrl.setValue(this.outputFormatsList.length ? this.outputFormatsList[0] : '');
-      }
-    } else if (outputCtrl) {
-      outputCtrl.setValue('');
-    }
-
+    // Clear columns - ReportColumnsComponent will handle loading new ones
     this.reportColumns.clear();
-  }
-
-  private findDocTypeForReport(reportName: string): string | undefined {
-    if (!reportName) return undefined;
-    if (this.allDocTypeByReport[reportName]) return this.allDocTypeByReport[reportName];
-    const lower = reportName.toLowerCase();
-    const exactKey = Object.keys(this.allDocTypeByReport).find(k => k.toLowerCase() === lower);
-    if (exactKey) return this.allDocTypeByReport[exactKey];
-    const partialKey = Object.keys(this.allDocTypeByReport).find(k => k.toLowerCase().includes(lower) || lower.includes(k.toLowerCase()));
-    if (partialKey) return this.allDocTypeByReport[partialKey];
-    return undefined;
-  }
-
-  private findColumnsForReport(reportName: string): string[] {
-    if (!reportName) return [];
-    // Exact match
-    if (this.allColumnsByReport[reportName]) return this.allColumnsByReport[reportName];
-
-    const lower = reportName.toLowerCase();
-    // Case-insensitive exact match
-    const exactKey = Object.keys(this.allColumnsByReport).find(k => k.toLowerCase() === lower);
-    if (exactKey) return this.allColumnsByReport[exactKey];
-
-    // Partial match (either direction)
-    const partialKey = Object.keys(this.allColumnsByReport).find(
-      k => k.toLowerCase().includes(lower) || lower.includes(k.toLowerCase())
-    );
-    if (partialKey) return this.allColumnsByReport[partialKey];
-
-    return [];
   }
 
   onColumnToggle(data: { column: string; event: Event }): void {
@@ -400,10 +307,28 @@ export class AppComponent implements OnInit, OnDestroy {
     this.resetForm();
   }
 
+  onDocTypeChanged(docType: string | undefined): void {
+    const format = this.columnDataService.getFormatByDocType(docType);
+    const ctrl = this.form.get('reportFormat');
+    if (ctrl) {
+      ctrl.setValue(format);
+    }
+  }
+
+  onOutputFormatsUpdated(formats: string[]): void {
+  setTimeout(() => {
+    this.outputFormatsList = formats;
+
+    const outputCtrl = this.form.get('outputFormat');
+    if (outputCtrl) {
+      outputCtrl.setValue(formats.length ? formats[0] : '');
+    }
+  });
+}
+
+
   private resetForm(): void {
     this.form.reset();
-    this.parameterFields = [];
-    this.reportColumnsList = [];
     this.sentPayload = null;
     this.apiResponse = null;
     this.errorMessage = null;
