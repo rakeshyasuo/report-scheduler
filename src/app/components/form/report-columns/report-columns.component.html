@@ -3,7 +3,7 @@
     Report Columns <span class="required">*</span>
   </h3>
   
-  <div class="dropdown-section" [class.invalid]="isFormInvalid">
+  <div class="dropdown-section" #dropdownSection [class.invalid]="isFormInvalid">
     <div *ngIf="columnsList.length === 0" class="empty-state">
       Please select a report first to see available columns
     </div>

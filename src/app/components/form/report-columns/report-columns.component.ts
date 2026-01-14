@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef } from "@angular/core";
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef, HostListener, ViewChild, ElementRef } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from "@angular/forms";
 import { Subject } from "rxjs";
@@ -19,6 +19,7 @@ export class ReportColumnsComponent implements OnInit, OnDestroy, OnChanges {
   @Output() columnToggled = new EventEmitter<{ column: string; event: Event }>();
   @Output() docTypeChanged = new EventEmitter<string | undefined>();
   @Output() outputFormatsUpdated = new EventEmitter<string[]>();
+  @ViewChild('dropdownSection', { static: false }) dropdownSection!: ElementRef;
 
   columnsList: string[] = [];
   isLoadingColumns = false;
@@ -51,6 +52,13 @@ export class ReportColumnsComponent implements OnInit, OnDestroy, OnChanges {
 
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.dropdownSection && !this.dropdownSection.nativeElement.contains(event.target)) {
+      this.isDropdownOpen = false;
+    }
   }
 
   getSelectedColumnsLabel(): string {

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup } from '@angular/forms';
 
@@ -16,6 +16,9 @@ export class ScheduleInfoComponent implements OnInit {
   @Output() cancelled = new EventEmitter<void>();
 
   minTime = ''; // Format: "14:30"
+  minDate = ''; // Format: "yyyy-MM-dd"
+  hasTimeScrollUp = false;
+  hasTimeScrollDown = false;
 
   timeZones = [
     { label: 'IST (GMT +5:30)', value: 'IST', offset: 330 },
@@ -24,13 +27,35 @@ export class ScheduleInfoComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.form.get('timeZone')?.valueChanges.subscribe(() => this.calculateMinTime());
+    this.calculateMinDate();
+    this.calculateMinTime();
+    this.form.get('timeZone')?.valueChanges.subscribe(() => {
+      this.calculateMinDate();
+      this.calculateMinTime();
+    });
+    this.form.get('scheduleType')?.valueChanges.subscribe(() => this.calculateMinTime());
     this.form.get('runOnDate')?.valueChanges.subscribe(() => this.calculateMinTime());
     this.form.get('scheduleStartDate')?.valueChanges.subscribe(() => this.calculateMinTime());
+    this.form.get('onceADay')?.valueChanges.subscribe(() => this.updateScrollIndicators());
+    this.form.get('repeatStartTime')?.valueChanges.subscribe(() => this.updateScrollIndicators());
+    this.form.get('repeatEndTime')?.valueChanges.subscribe(() => this.updateScrollIndicators());
   }
 
   get scheduleType(): string {
     return this.form.get('scheduleType')?.value || '';
+  }
+
+  private calculateMinDate(): void {
+    const tzVal = this.form.get('timeZone')?.value;
+    const tz = this.timeZones.find(t => t.value === tzVal);
+    if (!tz) {
+      this.minDate = '';
+      return;
+    }
+
+    const nowUtc = new Date();
+    const tzNow = new Date(nowUtc.getTime() + tz.offset * 60000);
+    this.minDate = tzNow.toISOString().split('T')[0]; // Format: "yyyy-MM-dd"
   }
 
   private calculateMinTime(): void {
@@ -54,7 +79,9 @@ export class ScheduleInfoComponent implements OnInit {
     }
 
     if (relevantDate && relevantDate === todayStr) {
-      this.minTime = tzNow.toTimeString().slice(0, 5); // "HH:mm"
+      const hours = String(tzNow.getUTCHours()).padStart(2, '0');
+      const minutes = String(tzNow.getUTCMinutes()).padStart(2, '0');
+      this.minTime = `${hours}:${minutes}`; // "HH:mm"
     } else {
       this.minTime = '';
     }
@@ -78,6 +105,26 @@ export class ScheduleInfoComponent implements OnInit {
 
   showFutureTimeErrorStartTime(): boolean {
     return this.isPastTime('repeatStartTime', 'runOnDate');
+  }
+
+  private updateScrollIndicators(): void {
+    // Check if any time input can scroll
+    setTimeout(() => {
+      const timeInputs = document.querySelectorAll('.time-scroll-indicator') as NodeListOf<HTMLInputElement>;
+      timeInputs.forEach((input) => {
+        // Detect if the input has scroll capability by checking if it's a time input
+        const wrapper = input.closest('.time-input-wrapper');
+        if (wrapper) {
+          // Show indicators for time inputs that can have scrollable content
+          const upIndicator = wrapper.querySelector('.scroll-up');
+          const downIndicator = wrapper.querySelector('.scroll-down');
+          if (upIndicator && downIndicator) {
+            upIndicator.classList.add('visible');
+            downIndicator.classList.add('visible');
+          }
+        }
+      });
+    });
   }
 
   onSubmit(): void {
