@@ -1,0 +1,3 @@
+endpoint,url,method,description
+schedule,http://OTX-H6FZ314:8181/api/reports/run,POST,Submit scheduled report
+getParameters,http://OTX-H6FZ314:8181/api/reports/parameters,GET,Fetch parameters for a report

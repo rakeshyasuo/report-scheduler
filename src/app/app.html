@@ -24,14 +24,16 @@
         ></app-basic-info>
 
         <app-report-columns 
-          [columnsList]="reportColumnsList"
+          [reportName]="form.get('reportName')?.value"
           [reportColumns]="reportColumns"
           [form]="form"
           (columnToggled)="onColumnToggle($event)"
+          (docTypeChanged)="onDocTypeChanged($event)"
+          (outputFormatsUpdated)="onOutputFormatsUpdated($event)"
         ></app-report-columns>
 
         <app-parameters 
-          [parameterFields]="parameterFields"
+          [reportName]="form.get('reportName')?.value"
           [parametersGroup]="parametersGroup"
         ></app-parameters>
       </div>

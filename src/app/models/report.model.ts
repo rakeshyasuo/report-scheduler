@@ -14,11 +14,6 @@ export interface SchedulePayload {
   schedule: Record<string, any> | null | string;
 }
 
-export interface ParameterField {
-  parameter: string;
-  defaultValue: string;
-}
-
 export enum ScheduleType {
   ONE_TIME = 'One Time',
   DAILY = 'Daily',
@@ -36,4 +31,18 @@ export interface ColumnCsvRow {
   reportName: string;
   columns: string; // comma-separated or pipe-separated string
   docType?: string; // 'template' | 'standard report'
+}
+
+// API Parameter Response Interfaces
+export interface ApiParameter {
+  name: string;
+  type: string; // 'String', 'Date', 'Number', 'Boolean', etc.
+  displayName?: string; // fallback to name if empty
+  defaultValue?: string | number | boolean | null;
+  required?: boolean;
+  description?: string; // optional field description
+}
+
+export interface ApiParametersResponse extends Array<ApiParameter> {
+  // Direct array response from API
 }

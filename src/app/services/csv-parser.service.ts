@@ -73,34 +73,9 @@ export class CsvParserService {
   getReportData(csvData: CsvRow[], reportName: string) {
     return csvData.filter(r => r.reportName === reportName);
   }
-  parseParametersCsv(data: string): ParameterCsvRow[] {
-    const lines = data.trim().split('\n');
-    const headers = this.parseCsvLine(lines[0]);
-
-    const reportIdx = headers.findIndex(h => h.toLowerCase().includes('report name'));
-    const paramIdx = headers.findIndex(h => h.toLowerCase().includes('parameter'));
-    const defaultIdx = headers.findIndex(h => h.toLowerCase().includes('default value'));
-
-    const result: ParameterCsvRow[] = [];
-    for (let i = 1; i < lines.length; i++) {
-      const values = this.parseCsvLine(lines[i]);
-      if (values[reportIdx]) {
-        result.push({
-          reportName: values[reportIdx].trim(),
-          parameter: values[paramIdx].trim(),
-          defaultValue: values[defaultIdx].trim()
-        });
-      }
-    }
-    return result;
-  }
-
-  getParametersByReport(data: ParameterCsvRow[], reportName: string): ParameterCsvRow[] {
-    return data.filter(r => r.reportName === reportName);
-  }
 
   // -------------------------
-  // New methods for columns CSV
+  // Methods for columns CSV
   // -------------------------
   parseColumnsCsv(data: string): ColumnCsvRow[] {
     const lines = data.trim().split('\n');
@@ -122,12 +97,6 @@ export class CsvParserService {
       }
     }
     return result;
-  }
-
-  getColumnsByReport(data: ColumnCsvRow[], reportName: string, separator: string = ','): string[] {
-    const row = data.find(r => r.reportName === reportName);
-    if (!row || !row.columns) return [];
-    return row.columns.split(separator).map(c => c.trim()).filter(Boolean);
   }
 
   parseDocFormatMapping(data: string): { [inputFormat: string]: string[] } {

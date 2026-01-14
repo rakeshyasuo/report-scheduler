@@ -1,16 +1,84 @@
-<div class="card" *ngIf="parameterFields.length > 0">
-  <h3 class="card-title">Parameters</h3>
-  <div class="parameters-grid" [formGroup]="parametersGroup">
-    <div class="param-field" *ngFor="let field of parameterFields">
-      <label [for]="'param_' + field.parameter" class="param-label">
-        {{ field.parameter }}
-      </label>
-      <input 
-        [id]="'param_' + field.parameter"
-        type="text"
-        [formControlName]="field.parameter"
-        class="param-input" 
-      />
+<div class="parameters-container">
+  <!-- Loading Spinner -->
+  <app-loading-spinner *ngIf="isLoadingParameters"></app-loading-spinner>
+
+  <!-- Error Message -->
+  <div *ngIf="parameterError" class="alert alert-error">
+    <strong>Error:</strong> {{ parameterError }}
+  </div>
+
+  <!-- Parameters Card -->
+  <div class="card" *ngIf="parameters.length > 0 && !isLoadingParameters">
+    <h3 class="card-title">Report Parameters</h3>
+    <div class="parameters-grid" [formGroup]="parametersGroup">
+      <div class="param-card" *ngFor="let param of parameters">
+        <!-- Parameter Label with Required Indicator -->
+        <div class="param-header">
+          <label [for]="'param_' + param.name" class="param-label">
+            {{ getParameterLabel(param) }}
+            <span *ngIf="param.required" class="required-indicator" title="Required field">*</span>
+          </label>
+        </div>
+
+        <!-- String/Text Input -->
+        <input
+          *ngIf="isTextType(param.type)"
+          [id]="'param_' + param.name"
+          type="text"
+          [formControlName]="param.name"
+          class="param-input"
+          [class.error]="hasError(param.name)"
+          placeholder="Enter value"
+          [attr.aria-label]="getParameterLabel(param)"
+        />
+
+        <!-- Date Input with Calendar -->
+        <input
+          *ngIf="isDateType(param.type)"
+          [id]="'param_' + param.name"
+          type="date"
+          [formControlName]="param.name"
+          class="param-input date-input"
+          [class.error]="hasError(param.name)"
+          [attr.aria-label]="getParameterLabel(param)"
+        />
+
+        <!-- Number Input -->
+        <input
+          *ngIf="isNumberType(param.type)"
+          [id]="'param_' + param.name"
+          type="number"
+          [formControlName]="param.name"
+          class="param-input"
+          [class.error]="hasError(param.name)"
+          placeholder="Enter number"
+          [attr.aria-label]="getParameterLabel(param)"
+        />
+
+        <!-- Boolean Checkbox -->
+        <div *ngIf="isBooleanType(param.type)" class="checkbox-wrapper">
+          <input
+            [id]="'param_' + param.name"
+            type="checkbox"
+            [formControlName]="param.name"
+            class="param-checkbox"
+            [attr.aria-label]="getParameterLabel(param)"
+          />
+          <label [for]="'param_' + param.name" class="checkbox-label">
+            {{ getParameterLabel(param) }}
+          </label>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="hasError(param.name)" class="error-message">
+          {{ getErrorMessage(param.name, param) }}
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="parameters.length === 0 && !isLoadingParameters && !parameterError" class="empty-state">
+    <p>No parameters to configure for this report.</p>
   </div>
 </div>
